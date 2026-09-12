@@ -18,11 +18,9 @@ const Notification = ({ message , errorMessage}) => {
   if (message === null && errorMessage === null) {
     return null
   }
- 
-
 
   return (
-   message ? <div style={okStyle}>{message}</div> : <div style={errorStyle}>{errorMessage}</div>
+    message ? <div style={okStyle}>{message}</div> : <div style={errorStyle}>{errorMessage}</div>
   )
 }
 

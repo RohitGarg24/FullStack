@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PersonForm from "./PersonForm";
 import Filter from "./Filter";
 import Persons from "./Persons";
+import Notification from "./Notification";
 import {
   addPerson,
   deletePerson,
@@ -13,6 +14,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [number, setNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [okMessage, setOkMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const getPerson = async () => {
     const res = await getPersons();
@@ -20,9 +23,22 @@ const App = () => {
     setPersons(res.data);
   };
   const addContact = async (person) => {
-    const res = await addPerson(person);
-    console.log("addPerson", res.data);
-    setPersons(persons.concat(res.data));
+    try {
+      const res = await addPerson(person);
+      console.log("addPerson", res.data);
+      setPersons(persons.concat(res.data));
+      setOkMessage(`Added ${person.name} successfully`);
+      setErrorMessage(null);
+      setTimeout(() => {
+        setOkMessage(null);
+      }, 5000);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.response?.data?.error || "Error adding contact");
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+    }
   };
   useEffect(() => {
     getPerson();
@@ -48,9 +64,22 @@ const App = () => {
     const confirmDelete = window.confirm(`Delete ${name}?`);
 
     if (confirmDelete) {
-      const res = await deletePerson(id);
-      console.log(res, "delete");
-      setPersons(persons.filter((n) => n.id != res.data.id));
+      try {
+        const res = await deletePerson(id);
+        console.log(res, "delete");
+        setPersons(persons.filter((n) => n.id != res.data.id));
+        setOkMessage(`Deleted ${name} successfully`);
+        setErrorMessage(null);
+        setTimeout(() => {
+          setOkMessage(null);
+        }, 5000);
+      } catch (error) {
+        console.error(error);
+        setErrorMessage(error.response?.data?.error || "Error deleting contact");
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      }
     }
   };
   const handleUpdate = async (person, id) => {
@@ -60,8 +89,17 @@ const App = () => {
       setPersons((prevPersons) =>
         prevPersons.map((p) => (p.id === id ? res.data : p)),
       );
+      setOkMessage(`Updated successfully`);
+      setErrorMessage(null);
+      setTimeout(() => {
+        setOkMessage(null);
+      }, 5000);
     } catch (error) {
       console.error(error);
+      setErrorMessage(error.response?.data?.error || "Error updating contact");
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     }
   };
   const handleSubmit = (event) => {
@@ -88,6 +126,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={okMessage} errorMessage={errorMessage} />
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <div>
         <h2>add new</h2>
